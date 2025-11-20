@@ -1,0 +1,286 @@
+import { getUser, getProfile } from '@/lib/auth';
+import { Navbar } from '@/components/Navbar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  StickyNote,
+  CheckSquare,
+  Brain,
+  Lock,
+  Zap,
+  Shield,
+  Globe,
+  Sparkles,
+  ArrowRight,
+  Check
+} from 'lucide-react';
+import Link from 'next/link';
+
+export default async function HomePage() {
+  const user = await getUser();
+  const profile = user ? await getProfile(user.id) : null;
+
+  // If user is logged in, show dashboard CTA or subscription prompt
+  if (user && profile) {
+    return (
+      <>
+        <Navbar user={user} />
+        <main className="min-h-screen bg-background">
+          <div className="container mx-auto px-4 py-16">
+            {!profile.is_subscribed ? (
+              // Unsubscribed User - Attractive CTA
+              <div className="max-w-4xl mx-auto space-y-8">
+                <div className="text-center space-y-4">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+                    <Sparkles className="w-4 h-4" />
+                    Premium Features Await
+                  </div>
+                  <h1 className="text-5xl lg:text-6xl font-bold text-foreground">
+                    Unlock Your Full Potential
+                  </h1>
+                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                    Get unlimited access to all productivity tools with a premium subscription
+                  </p>
+                </div>
+
+                <Card className="border-accent/50 bg-card hover:shadow-2xl transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                      {[
+                        { icon: StickyNote, title: 'Unlimited Notes', desc: 'Never run out of space for your ideas' },
+                        { icon: CheckSquare, title: 'Advanced To-Dos', desc: 'Powerful task management features' },
+                        { icon: Brain, title: 'Smart Flashcards', desc: 'AI-powered study recommendations' },
+                        { icon: Lock, title: 'Password Vault', desc: 'Military-grade encryption protection' },
+                      ].map((feature, i) => (
+                        <div key={i} className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                            <feature.icon className="w-6 h-6 text-accent" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-foreground mb-1">{feature.title}</h3>
+                            <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="text-center space-y-4">
+                      <Link href="/pricing">
+                        <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8">
+                          View Pricing Plans
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </Button>
+                      </Link>
+                      <p className="text-sm text-muted-foreground">
+                        Start your 14-day free trial • No credit card required
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              // Subscribed User - Dashboard CTA
+              <div className="max-w-4xl mx-auto space-y-8">
+                <div className="text-center space-y-4">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+                    <Check className="w-4 h-4" />
+                    Premium Active
+                  </div>
+                  <h1 className="text-5xl lg:text-6xl font-bold text-foreground">
+                    Welcome Back!
+                  </h1>
+                  <p className="text-xl text-muted-foreground">
+                    Ready to boost your productivity?
+                  </p>
+                </div>
+
+                <Card className="border-accent/50 bg-card hover:shadow-2xl transition-shadow">
+                  <CardContent className="pt-6 text-center space-y-6">
+                    <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center mx-auto">
+                      <Sparkles className="w-10 h-10 text-accent" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground mb-2">
+                        Your Workspace Awaits
+                      </h2>
+                      <p className="text-muted-foreground">
+                        Access all your tools, notes, tasks, and more in one place
+                      </p>
+                    </div>
+                    <Link href="/dashboard">
+                      <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8">
+                        Go to Dashboard
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { icon: StickyNote, label: 'Notes', value: '∞' },
+                    { icon: CheckSquare, label: 'Tasks', value: '∞' },
+                    { icon: Brain, label: 'Decks', value: '∞' },
+                    { icon: Lock, label: 'Passwords', value: '∞' },
+                  ].map((stat, i) => (
+                    <Card key={i} className="bg-card border-border">
+                      <CardContent className="pt-6 text-center">
+                        <stat.icon className="w-6 h-6 text-accent mx-auto mb-2" />
+                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                        <p className="text-sm text-muted-foreground">{stat.label}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  // Landing page for non-logged-in users
+  const features = [
+    {
+      icon: StickyNote,
+      title: 'Smart Notes',
+      description: 'Capture ideas instantly with rich formatting and organization',
+    },
+    {
+      icon: CheckSquare,
+      title: 'Task Management',
+      description: 'Stay on top of your to-dos with beautiful progress tracking',
+    },
+    {
+      icon: Brain,
+      title: 'Flashcards',
+      description: 'Master any subject with spaced repetition learning',
+    },
+    {
+      icon: Lock,
+      title: 'Password Vault',
+      description: 'Military-grade encryption keeps passwords secure',
+    }
+  ];
+
+  const benefits = [
+    { icon: Zap, title: 'Lightning Fast', description: 'Built for instant response times' },
+    { icon: Shield, title: 'Bank-Level Security', description: 'AES-256 encryption with PBKDF2' },
+    { icon: Globe, title: 'Multi-Language', description: 'English and Portuguese support' },
+    { icon: Sparkles, title: 'Beautiful UI', description: 'Dark mode and stunning design' }
+  ];
+
+  return (
+    <>
+      <Navbar user={null} />
+      <div className="min-h-screen bg-background">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden border-b border-border">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
+          
+          <div className="relative container mx-auto px-4 py-20 lg:py-32">
+            <div className="text-center max-w-4xl mx-auto space-y-8">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold">
+                <Sparkles className="w-4 h-4" />
+                All-in-One Productivity Suite
+              </span>
+              
+              <h1 className="text-5xl lg:text-7xl font-bold text-foreground leading-tight">
+                Your Digital Brain,
+                <br />
+                <span className="text-accent">Simplified</span>
+              </h1>
+              
+              <p className="text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto">
+                Notes, to-dos, flashcards, and secure password management—all in one beautiful workspace
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/register">
+                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6">
+                    Start Free <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-border text-foreground hover:bg-muted">
+                    Sign In
+                  </Button>
+                </Link>
+              </div>
+              
+              <p className="text-sm text-muted-foreground">
+                No credit card required • Free forever plan available
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className="py-20 px-4">
+          <div className="container mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-foreground mb-4">Everything You Need</h2>
+              <p className="text-xl text-muted-foreground">Four powerful tools, one seamless experience</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {features.map((feature, i) => (
+                <Card key={i} className="group hover:shadow-xl transition-all hover:-translate-y-2 bg-card border-border">
+                  <CardHeader>
+                    <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <feature.icon className="w-6 h-6 text-accent" />
+                    </div>
+                    <CardTitle className="text-foreground">{feature.title}</CardTitle>
+                    <CardDescription className="text-muted-foreground">{feature.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits */}
+        <section className="py-20 px-4 bg-muted/30 border-y border-border">
+          <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {benefits.map((benefit, i) => (
+              <div key={i} className="text-center space-y-4">
+                <div className="mx-auto w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
+                  <benefit.icon className="w-8 h-8 text-accent" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">{benefit.title}</h3>
+                <p className="text-sm text-muted-foreground">{benefit.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="py-20 px-4">
+          <Card className="container mx-auto max-w-4xl bg-accent border-accent">
+            <CardContent className="text-center py-16">
+              <h2 className="text-4xl font-bold text-accent-foreground mb-4">Ready to Get Started?</h2>
+              <p className="text-xl mb-8 text-accent-foreground/90">
+                Join thousands boosting productivity with Notisafe
+              </p>
+              <Link href="/register">
+                <Button size="lg" variant="secondary" className="text-lg px-8 py-6 bg-background text-foreground hover:bg-background/90">
+                  Create Free Account <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t border-border py-12 px-4">
+          <div className="container mx-auto text-center text-muted-foreground">
+            <p>© 2025 Notisafe. Built with ❤️ using Next.js, Fastify, and Supabase</p>
+          </div>
+        </footer>
+      </div>
+    </>
+  );
+}

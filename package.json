@@ -1,0 +1,21 @@
+{
+  "name": "notisafe",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm --workspace apps/api install && npm --workspace apps/web install",
+    "start:api": "npm --workspace apps/api run start",
+    "start:web": "npm --workspace apps/web run start",
+    "start": "powershell -NoProfile -Command \"Start-Process powershell -ArgumentList '-NoProfile','-Command','npm run start:api' ; npm run start:web\"",
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:api": "npm --workspace apps/api run dev",
+    "dev": "powershell -NoProfile -Command \"Start-Process powershell -ArgumentList '-NoProfile','-Command','npm run dev:api' ; npm run dev:web\"",
+    "build": "npm --workspace apps/api run build && npm --workspace apps/web run build",
+    "typecheck": "npm --workspace apps/api run typecheck && npm --workspace apps/web run typecheck",
+    "lint": "npm --workspace apps/web run lint"
+  }
+}
