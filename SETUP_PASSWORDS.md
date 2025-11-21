@@ -13,7 +13,7 @@ Abra o **SQL Editor** no dashboard do Supabase e execute:
 
 Ou via CLI:
 ```bash
-cd c:\Users\pedro\OneDrive\Documentos\Notisafe
+cd c:\Users\pedro\OneDrive\Documentos\Nous
 supabase db push
 ```
 

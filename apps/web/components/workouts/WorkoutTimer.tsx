@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Play, Pause, SkipForward, CheckCircle } from 'lucide-react';
@@ -46,6 +46,7 @@ export function WorkoutTimer({
   }, [open]);
 
   // Timer para atualizar tempo decorrido
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!workoutStartTime) return;
     

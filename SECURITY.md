@@ -1,4 +1,4 @@
-# 🔐 Sistema de Criptografia de Senhas - Notisafe
+# 🔐 Sistema de Criptografia de Senhas - Nous
 
 ## Arquitetura de Segurança
 

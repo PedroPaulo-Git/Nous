@@ -36,9 +36,9 @@ export function WeekCalendar({ workoutDays, selectedDay, onSelectDay, onUpdateMu
   };
 
   return (
-    <div className="bg-card rounded-lg border border-border p-6">
-      <h2 className="text-lg font-semibold mb-4 text-foreground">{t('workouts.week_schedule')}</h2>
-      <div className="grid grid-cols-7 gap-3">
+    <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
+      <h2 className="text-base sm:text-lg font-semibold mb-4 text-foreground">{t('workouts.week_schedule')}</h2>
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 sm:gap-3">
         {[1, 2, 3, 4, 5, 6, 7].map((dayOfWeek) => {
           const dayData = getDayData(dayOfWeek);
           const muscleStyle = getMuscleGroupStyle(dayData?.muscle_group);
@@ -50,29 +50,29 @@ export function WeekCalendar({ workoutDays, selectedDay, onSelectDay, onUpdateMu
               key={dayOfWeek}
               onClick={() => dayData && onSelectDay(dayData)}
               className={cn(
-                'relative border border-border rounded-lg p-4 transition-all hover:shadow-md bg-card',
+                'relative border border-border rounded-lg p-3 sm:p-4 transition-all hover:shadow-md bg-card',
                 isSelected ? 'ring-2 ring-accent shadow-md' : 'hover:border-accent/50'
               )}
             >
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-1.5 sm:space-y-2">
                 {/* Dia da semana */}
-                <p className="text-xs font-medium text-muted-foreground">
+                <p className="text-xs font-medium text-muted-foreground truncate">
                   {t(`workouts.days.${dayOfWeek}`)}
                 </p>
                 
                 {/* Ícone do grupo muscular */}
-                <div className={cn('w-12 h-12 rounded-full mx-auto flex items-center justify-center', muscleStyle.color)}>
-                  <muscleStyle.icon className="h-6 w-6" />
+                <div className={cn('w-10 h-10 sm:w-12 sm:h-12 rounded-full mx-auto flex items-center justify-center', muscleStyle.color)}>
+                  <muscleStyle.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
 
                 {/* Nome do grupo muscular */}
-                <p className="text-xs font-medium text-foreground">
+                <p className="text-xs font-medium text-foreground truncate">
                   {t(`workouts.muscle_groups.${dayData?.muscle_group || 'rest'}`)}
                 </p>
 
                 {/* Contador de exercícios */}
                 {exerciseCount > 0 && (
-                  <div className="absolute top-2 right-2 bg-accent text-accent-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                  <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 bg-accent text-accent-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
                     {exerciseCount}
                   </div>
                 )}
@@ -87,7 +87,7 @@ export function WeekCalendar({ workoutDays, selectedDay, onSelectDay, onUpdateMu
                     onUpdateMuscleGroup(dayData.id, e.target.value);
                   }}
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute bottom-2 left-2 right-2 text-xs border border-border rounded p-1 bg-background text-foreground"
+                  className="absolute bottom-1.5 sm:bottom-2 left-1.5 sm:left-2 right-1.5 sm:right-2 text-xs border border-border rounded p-1 bg-background text-foreground"
                 >
                   {MUSCLE_GROUPS.map(group => (
                     <option key={group.value} value={group.value}>

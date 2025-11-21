@@ -1,4 +1,5 @@
 import { getUser, getProfile } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
 import { Navbar } from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ import Link from 'next/link';
 
 export default async function HomePage() {
   const user = await getUser();
+  const tLanding = await getTranslations('landing');
   const profile = user ? await getProfile(user.id) : null;
 
   // If user is logged in, show dashboard CTA or subscription prompt
@@ -108,7 +110,7 @@ export default async function HomePage() {
                       </p>
                     </div>
                     <Link href="/dashboard">
-                      <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8">
+                      <Button size="lg" className="bg-accent hover:bg-accent/90 mt-4 text-accent-foreground text-lg px-8">
                         Go to Dashboard
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </Button>
@@ -257,27 +259,50 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-20 px-4">
-          <Card className="container mx-auto max-w-4xl bg-accent border-accent">
-            <CardContent className="text-center py-16">
-              <h2 className="text-4xl font-bold text-accent-foreground mb-4">Ready to Get Started?</h2>
-              <p className="text-xl mb-8 text-accent-foreground/90">
-                Join thousands boosting productivity with Notisafe
-              </p>
-              <Link href="/register">
-                <Button size="lg" variant="secondary" className="text-lg px-8 py-6 bg-background text-foreground hover:bg-background/90">
-                  Create Free Account <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+        {/* CTA (Glass / Floating Window) */}
+        <section className="py-28 px-4 relative">
+          {/* Decorative blurred gradients behind the glass */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute -top-32 left-1/3 w-[40rem] h-[40rem] bg-accent/15 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 -right-20 w-[32rem] h-[32rem] bg-accent/10 rounded-full blur-3xl" />
+          </div>
+          <div className="container mx-auto max-w-5xl">
+            <div className="group relative rounded-3xl border border-accent/30 bg-background/40 backdrop-blur-xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.45)] ring-1 ring-accent/20 overflow-hidden transition-all duration-500 hover:shadow-[0_12px_48px_-6px_rgba(0,0,0,0.55)]">
+              {/* Subtle top bar */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+              {/* Soft moving sheen */}
+              <div className="absolute inset-0 [mask-image:radial-gradient(circle_at_30%_20%,white,transparent)] bg-accent/5 animate-[pulse_6s_ease-in-out_infinite]" />
+              <div className="relative z-10 text-center px-6 md:px-14 py-20">
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent/70 mb-6">
+                  {tLanding('cta_title')}
+                </h2>
+                <p className="text-xl md:text-2xl text-muted-foreground/90 max-w-2xl mx-auto mb-10">
+                  {tLanding('cta_subtitle')}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/register" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto text-lg px-8 md:px-12 py-6 md:py-7 rounded-full bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 transition-all">
+                      {tLanding('cta_create')} <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </Link>
+                  <Link href="/login" className="w-full sm:w-auto">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 md:px-12 py-6 md:py-7 rounded-full border-accent/40 backdrop-blur-sm hover:bg-accent/10 hover:border-accent/60 transition-all">
+                      {tLanding('cta_login')}
+                    </Button>
+                  </Link>
+                </div>
+                <p className="mt-6 text-sm opacity-80">
+                  {tLanding('cta_no_credit')}
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Footer */}
         <footer className="border-t border-border py-12 px-4">
           <div className="container mx-auto text-center text-muted-foreground">
-            <p>© 2025 Notisafe. Built with ❤️ using Next.js, Fastify, and Supabase</p>
+            <p>© 2025 Nous. Built with ❤️ using Next.js, Fastify, and Supabase</p>
           </div>
         </footer>
       </div>

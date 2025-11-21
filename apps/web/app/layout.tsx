@@ -6,7 +6,7 @@ import { IntlProvider } from '@/components/providers/intl-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Notisafe – All-in-One Productivity Suite',
+  title: 'Nous – All-in-One Productivity Suite',
   description: 'Flashcards, To-Dos, Notes, and Secure Password Manager in one platform.',
 };
 

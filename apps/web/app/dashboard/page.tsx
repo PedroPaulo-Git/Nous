@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StickyNote, CheckSquare, Brain, Lock, ArrowRight, Dumbbell } from "lucide-react";
@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase-client";
 import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-  const t = useTranslations();
+  const t = useTranslations('dashboard');
   const router = useRouter();
   const [stats, setStats] = useState({
     notes: 0,
@@ -21,23 +21,7 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkUserAndFetchStats();
-  }, []);
-
-  const checkUserAndFetchStats = async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
-    await fetchStats();
-  };
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const token = await getToken();
 
@@ -67,40 +51,56 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const checkUserAndFetchStats = useCallback(async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    await fetchStats();
+  }, [router, fetchStats]);
+
+  useEffect(() => {
+    checkUserAndFetchStats();
+  }, [checkUserAndFetchStats]);
 
   const tools = [
     {
-      name: t("dashboard.tool_notes"),
-      description: t("dashboard.tool_notes_desc"),
+      name: t("tool_notes"),
+      description: t("tool_notes_desc"),
       icon: StickyNote,
       href: "/dashboard/notes",
       color: "text-accent",
     },
     {
-      name: t("dashboard.tool_todos"),
-      description: t("dashboard.tool_todos_desc"),
+      name: t("tool_todos"),
+      description: t("tool_todos_desc"),
       icon: CheckSquare,
       href: "/dashboard/todos",
       color: "text-accent",
     },
     {
-      name: t("dashboard.tool_flashcards"),
-      description: t("dashboard.tool_flashcards_desc"),
+      name: t("tool_flashcards"),
+      description: t("tool_flashcards_desc"),
       icon: Brain,
       href: "/dashboard/flashcards",
       color: "text-accent",
     },
     {
-      name: t("dashboard.tool_passwords"),
-      description: t("dashboard.tool_passwords_desc"),
+      name: t("tool_passwords"),
+      description: t("tool_passwords_desc"),
       icon: Lock,
       href: "/dashboard/passwords",
       color: "text-accent",
     },
     {
-      name: t("dashboard.tool_workouts"),
-      description: t("dashboard.tool_workouts_desc"),
+      name: t("tool_workouts"),
+      description: t("tool_workouts_desc"),
       icon: Dumbbell,
       href: "/dashboard/workouts",
       color: "text-accent",
@@ -109,14 +109,14 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-20 lg:pt-12">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            {t("dashboard.title")}
+            {t("title")}
           </h1>
           <p className="text-lg text-muted-foreground">
-            {t("dashboard.subtitle")}
+            {t("subtitle")}
           </p>
         </div>
 
@@ -150,25 +150,25 @@ export default function DashboardPage() {
         {/* Stats Section */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="p-6 border-border bg-card">
-            <p className="text-sm text-muted-foreground mb-1">{t("dashboard.stats_total_notes")}</p>
+            <p className="text-sm text-muted-foreground mb-1">{t("stats_total_notes")}</p>
             <p className="text-3xl font-bold text-foreground">
               {loading ? "..." : stats.notes}
             </p>
           </Card>
           <Card className="p-6 border-border bg-card">
-            <p className="text-sm text-muted-foreground mb-1">{t("dashboard.stats_active_todos")}</p>
+            <p className="text-sm text-muted-foreground mb-1">{t("stats_active_todos")}</p>
             <p className="text-3xl font-bold text-foreground">
               {loading ? "..." : stats.todos}
             </p>
           </Card>
           <Card className="p-6 border-border bg-card">
-            <p className="text-sm text-muted-foreground mb-1">{t("dashboard.stats_flashcard_decks")}</p>
+            <p className="text-sm text-muted-foreground mb-1">{t("stats_flashcard_decks")}</p>
             <p className="text-3xl font-bold text-foreground">
               {loading ? "..." : stats.decks}
             </p>
           </Card>
           <Card className="p-6 border-border bg-card">
-            <p className="text-sm text-muted-foreground mb-1">{t("dashboard.stats_saved_passwords")}</p>
+            <p className="text-sm text-muted-foreground mb-1">{t("stats_saved_passwords")}</p>
             <p className="text-3xl font-bold text-foreground">
               {loading ? "..." : stats.passwords}
             </p>

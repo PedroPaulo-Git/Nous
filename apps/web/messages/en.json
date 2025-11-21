@@ -1,5 +1,5 @@
 {
-  "app_name": "Notisafe",
+  "app_name": "Nous",
   "landing": {
     "hero_badge": "All-in-One Productivity Suite",
     "hero_title": "Your Digital Brain, Simplified",
@@ -26,7 +26,7 @@
     "benefits_ui": "Beautiful UI",
     "benefits_ui_desc": "Dark mode and stunning design",
     "cta_title": "Ready to Get Started?",
-    "cta_subtitle": "Join thousands boosting productivity with Notisafe",
+    "cta_subtitle": "Join thousands boosting productivity with Nous",
     "cta_create": "Create Free Account",
     "footer": "Built with ❤️ using Next.js, Fastify, and Supabase"
   },
@@ -56,7 +56,7 @@
     "subscribed_stats_passwords": "Passwords"
   },
   "dashboard": {
-    "title": "Welcome to Notisafe",
+    "title": "Welcome to Nous",
     "subtitle": "Your all-in-one productivity suite",
     "tool_notes": "Notes",
     "tool_notes_desc": "Create and organize your notes efficiently",
@@ -306,6 +306,8 @@
     "edit": "Edit",
     "save": "Save",
     "optional": "optional",
-    "of": "of"
+    "of": "of",
+    "home": "Home",
+    "dashboard": "Dashboard"
   }
 }

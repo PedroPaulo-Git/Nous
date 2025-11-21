@@ -37,7 +37,7 @@ export function DeleteDeckDialog({
             </div>
             <div className="flex-1">
               <AlertDialogTitle className="text-foreground">
-                Delete Deck "{deckName}"?
+                Delete Deck &quot;{deckName}&quot;?
               </AlertDialogTitle>
             </div>
           </div>

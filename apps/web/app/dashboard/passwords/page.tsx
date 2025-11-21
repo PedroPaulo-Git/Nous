@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, API_URL } from "@/lib/api";
 import { encryptPassword, decryptPassword, deserializeEncrypted, serializeEncrypted, generateSecurePassword } from "@/lib/crypto";
@@ -34,11 +34,8 @@ export default function PasswordsPage() {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const checkUser = useCallback(async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -47,7 +44,11 @@ export default function PasswordsPage() {
     }
     setUser(user);
     fetchPasswords(user); // Pass user directly
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkUser();
+  }, [checkUser]);
 
   const fetchPasswords = async (currentUser?: any) => {
     try {
@@ -213,22 +214,22 @@ export default function PasswordsPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background p-6 space-y-6">
+    <div className="min-h-screen bg-background p-6 pt-20 lg:pt-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
             <Lock className="w-5 h-5 text-accent" />
           </div>
           <div>
-              <h1 className="text-2xl font-bold text-foreground">{t("passwords.title")}</h1>
-              <p className="text-sm text-muted-foreground">{t("passwords.subtitle")}</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t("passwords.title")}</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">{t("passwords.subtitle")}</p>
           </div>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNewDialog} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button onClick={openNewDialog} className="bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               {t("passwords.new_password")}
             </Button>
@@ -285,12 +286,12 @@ export default function PasswordsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">{t("passwords.label_category")}</label>
                 <Tabs value={category} onValueChange={setCategory}>
-                  <TabsList className="bg-muted grid grid-cols-5">
+                  <TabsList className="bg-muted w-full h-auto flex-wrap justify-start gap-1 p-1">
                     {categories.filter((c) => c !== "All").map((cat) => (
                       <TabsTrigger
                         key={cat}
                         value={cat}
-                        className="data-[state=active]:bg-card data-[state=active]:text-accent text-xs"
+                        className="data-[state=active]:bg-accent text-xs sm:text-sm px-2 sm:px-3 py-1.5 flex-1 min-w-[70px] sm:min-w-0"
                       >
                         {t(`passwords.category_${cat.toLowerCase()}`)}
                       </TabsTrigger>
@@ -327,19 +328,28 @@ export default function PasswordsPage() {
       </div>
 
       {/* Category Filter */}
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className="bg-muted">
-          {categories.map((cat) => (
-            <TabsTrigger
-              key={cat}
-              value={cat}
-              className="data-[state=active]:bg-card data-[state=active]:text-accent"
-            >
-              {t(`passwords.category_${cat.toLowerCase()}`)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <Card className="border-border bg-card/50 backdrop-blur-sm">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center gap-3">
+            <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
+            <div className="overflow-x-auto scrollbar-hide flex-1">
+              <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+                <TabsList className="bg-muted/50 border border-border inline-flex w-auto h-auto p-1 gap-1">
+                  {categories.map((cat) => (
+                    <TabsTrigger
+                      key={cat}
+                      value={cat}
+                      className="data-[state=active]:bg-accent data-[state=active]:shadow-md text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-md transition-all whitespace-nowrap hover:bg-muted"
+                    >
+                      {t(`passwords.category_${cat.toLowerCase()}`)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Passwords Grid */}
       {loading ? (
@@ -374,40 +384,40 @@ export default function PasswordsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {filteredPasswords.map((pwd) => (
             <Card
               key={pwd.id}
-              className="group hover:shadow-lg transition-all duration-200 bg-card border-border hover:border-accent"
+              className="group hover:shadow-xl transition-all duration-300 bg-card border-border hover:border-accent hover:scale-[1.02]"
             >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-foreground group-hover:text-accent transition-colors">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-base sm:text-lg text-foreground group-hover:text-accent transition-colors truncate">
                       {pwd.website}
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground mt-1">
+                    <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">
                       {pwd.username}
                     </CardDescription>
                   </div>
-                  <Badge variant="outline" className={`${categoryColors[pwd.category]} border`}>
+                  <Badge variant="outline" className={`${categoryColors[pwd.category]} border text-xs flex-shrink-0`}>
                     {pwd.category}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2">
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <Input
                     type={visiblePasswords.has(pwd.id) ? "text" : "password"}
                     value={pwd.password}
                     readOnly
-                    className="flex-1 border-border bg-background text-foreground font-mono text-sm"
+                    className="flex-1 border-border bg-background/50 text-foreground font-mono text-xs sm:text-sm"
                   />
                   <Button
                     variant="outline"
                     size="icon"
+                    className="h-9 w-9 border-border text-foreground hover:bg-muted hover:border-accent flex-shrink-0"
                     onClick={() => toggleVisibility(pwd.id)}
-                    className="border-border text-foreground hover:bg-muted"
                   >
                     {visiblePasswords.has(pwd.id) ? (
                       <EyeOff className="w-4 h-4" />
@@ -418,30 +428,30 @@ export default function PasswordsPage() {
                   <Button
                     variant="outline"
                     size="icon"
+                    className="h-9 w-9 border-border text-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent flex-shrink-0"
                     onClick={() => copyToClipboard(pwd.password, t("passwords.label_password"))}
-                    className="border-border text-foreground hover:bg-muted"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
               </CardContent>
-              <CardFooter className="flex gap-2">
+              <CardFooter className="flex gap-2 pt-3">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => openEditDialog(pwd)}
-                  className="flex-1 border-border text-foreground hover:bg-muted"
+                  className="flex-1 border-border text-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent text-xs sm:text-sm"
                 >
-                  <Edit className="w-4 h-4 mr-2" />
+                  <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   {t("passwords.button_edit")}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => deletePassword(pwd.id, pwd.website)}
-                  className="border-border text-foreground hover:bg-red-900/20 hover:text-red-400 hover:border-red-400"
+                  className="border-border text-foreground hover:bg-red-500/10 hover:text-red-500 hover:border-red-500 px-2 sm:px-3"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
               </CardFooter>
             </Card>

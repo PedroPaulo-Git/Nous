@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, API_URL } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -27,11 +27,8 @@ export default function NotesPage() {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const checkUser = useCallback(async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -40,7 +37,11 @@ export default function NotesPage() {
     }
     setUser(user);
     fetchNotes();
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkUser();
+  }, [checkUser]);
 
   const fetchNotes = async () => {
     try {
@@ -155,23 +156,23 @@ export default function NotesPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background p-6 space-y-6">
+    <div className="min-h-screen bg-background p-6 pt-20 lg:pt-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
             <StickyNote className="w-5 h-5 text-accent" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{t("notes.title")}</h1>
-            <p className="text-sm text-muted-foreground">{t("notes.subtitle")}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t("notes.title")}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">{t("notes.subtitle")}</p>
           </div>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNewDialog} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Plus className="w-4 h-4" />
+            <Button onClick={openNewDialog} className="bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto">
+              <Plus className="w-4 h-4 mr-2" />
               {t("notes.new_note")}
             </Button>
           </DialogTrigger>

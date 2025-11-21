@@ -1,4 +1,4 @@
-# Notisafe – All-in-One Productivity Suite
+# Nous – All-in-One Productivity Suite
 
 A complete SaaS productivity suite with **Notes**, **To-Dos**, **Flashcards**, and a **Secure Password Vault** with client-side encryption.
 
@@ -36,7 +36,7 @@ A complete SaaS productivity suite with **Notes**, **To-Dos**, **Flashcards**, a
 ## 📦 Project Structure
 
 ```
-notisafe/
+Nous/
 ├── apps/
 │   ├── api/              # Backend (Fastify)
 │   │   ├── src/
@@ -65,8 +65,8 @@ notisafe/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/notisafe.git
-cd notisafe
+git clone https://github.com/yourusername/Nous.git
+cd Nous
 ```
 
 ### 2. Install all dependencies
@@ -103,7 +103,7 @@ SUPABASE_ANON_KEY=your_anon_key
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_APP_NAME=Notisafe
+NEXT_PUBLIC_APP_NAME=Nous
 ```
 
 ## 🚀 Running the Application
@@ -366,9 +366,9 @@ Contributions welcome! Please:
 
 ## 📧 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/notisafe/issues)
-- **Email**: support@notisafe.com
-- **Docs**: [Documentation](https://docs.notisafe.com)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/Nous/issues)
+- **Email**: support@Nous.com
+- **Docs**: [Documentation](https://docs.Nous.com)
 
 ---
 

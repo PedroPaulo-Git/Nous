@@ -1,5 +1,5 @@
 {
-  "app_name": "Notisafe",
+  "app_name": "Nous",
   "landing": {
     "hero_badge": "Suite de Produtividade Tudo-em-Um",
     "hero_title": "Seu Cérebro Digital, Simplificado",
@@ -26,7 +26,7 @@
     "benefits_ui": "Interface Linda",
     "benefits_ui_desc": "Modo escuro e design deslumbrante",
     "cta_title": "Pronto para Começar?",
-    "cta_subtitle": "Junte-se a milhares aumentando a produtividade com Notisafe",
+    "cta_subtitle": "Junte-se a milhares aumentando a produtividade com Nous",
     "cta_create": "Criar Conta Gratuita",
     "footer": "Feito com ❤️ usando Next.js, Fastify e Supabase"
   },
@@ -56,7 +56,7 @@
     "subscribed_stats_passwords": "Senhas"
   },
   "dashboard": {
-    "title": "Bem-vindo ao Notisafe",
+    "title": "Bem-vindo ao Nous",
     "subtitle": "Sua suite de produtividade tudo-em-um",
     "tool_notes": "Notas",
     "tool_notes_desc": "Crie e organize suas notas com eficiência",
@@ -306,6 +306,8 @@
     "edit": "Editar",
     "save": "Salvar",
     "optional": "opcional",
-    "of": "de"
+    "of": "de",
+    "home": "Início",
+    "dashboard": "Painel"
   }
 }

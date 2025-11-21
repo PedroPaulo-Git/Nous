@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, API_URL } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -60,11 +60,8 @@ export default function FlashcardsPage() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const checkUser = useCallback(async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -72,7 +69,11 @@ export default function FlashcardsPage() {
       return;
     }
     await Promise.all([fetchDecks(), fetchUserStats()]);
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkUser();
+  }, [checkUser]);
 
   const authHeader = async () => {
     const token = await getToken();
@@ -360,7 +361,7 @@ export default function FlashcardsPage() {
     const minutes = Math.floor(duration / 60);
     const seconds = duration % 60;
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6 pt-20 lg:pt-6">
         <Card className="w-full max-w-2xl bg-card border-border">
           <CardHeader className="text-center">
             <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
@@ -417,13 +418,13 @@ export default function FlashcardsPage() {
     const currentCard = selectedDeck.flashcards[currentCardIndex];
     const progress = ((currentCardIndex + 1) / selectedDeck.flashcards.length) * 100;
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <Button variant="outline" onClick={() => { setStudyMode(false); setSelectedDeck(null); }} className="border-border text-foreground hover:bg-muted">
-              <ArrowLeft className="w-4 h-4 mr-2" /> {t("flashcards.exit_study")}
+      <div className="min-h-screen bg-background p-4 sm:p-6 pt-20 lg:pt-6">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <div className="flex items-center justify-between gap-2">
+            <Button variant="outline" onClick={() => { setStudyMode(false); setSelectedDeck(null); }} className="border-border text-foreground hover:bg-muted text-sm">
+              <ArrowLeft className="w-4 h-4 mr-2" /> <span className="hidden xs:inline">{t("flashcards.exit_study")}</span><span className="xs:hidden">Exit</span>
             </Button>
-            <div className="text-muted-foreground">{currentCardIndex + 1} / {selectedDeck.flashcards.length}</div>
+            <div className="text-sm sm:text-base text-muted-foreground">{currentCardIndex + 1} / {selectedDeck.flashcards.length}</div>
           </div>
           <div className="space-y-2">
             <Progress value={progress} className="h-2" />
@@ -485,32 +486,32 @@ export default function FlashcardsPage() {
 
   // Main view
   return (
-    <div className="min-h-screen bg-background p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-background p-6 pt-20 lg:pt-6 space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
             <Brain className="w-5 h-5 text-accent" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{t("flashcards.title")}</h1>
-            <p className="text-sm text-muted-foreground">{t("flashcards.subtitle")}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t("flashcards.title")}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">{t("flashcards.subtitle")}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
           {dailyStreak > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-lg border border-accent/20">
+            <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-accent/10 rounded-lg border border-accent/20">
               <Award className="w-4 h-4 text-accent" />
-              <span className="text-sm font-medium text-foreground">{dailyStreak} {dailyStreak === 1 ? 'day' : 'days'}</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground">{dailyStreak} {dailyStreak === 1 ? 'day' : 'days'}</span>
             </div>
           )}
-          <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-lg border border-border">
+          <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-card rounded-lg border border-border">
             <TrendingUp className="w-4 h-4 text-accent" />
-            <span className="text-sm text-muted-foreground">{todayStudied}/{dailyGoal} today</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">{todayStudied}/{dailyGoal} today</span>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Dialog open={deckDialogOpen} onOpenChange={setDeckDialogOpen}>
           <DialogTrigger asChild>
             <Card className="border-dashed border-2 border-border hover:border-accent/50 cursor-pointer transition-colors bg-card/50">
@@ -570,7 +571,7 @@ export default function FlashcardsPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                 <div className="bg-background rounded p-2 border border-border">
                   <p className="text-lg font-bold text-foreground">{deck.cards_count || deck.flashcards.length}</p>
                   <p className="text-xs text-muted-foreground">Total</p>
@@ -589,10 +590,10 @@ export default function FlashcardsPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => startStudy(deck)} disabled={!deck.flashcards || deck.flashcards.length === 0} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90">
-                  <Play className="w-4 h-4 mr-2" /> {t("flashcards.study")}
+                <Button onClick={() => startStudy(deck)} disabled={!deck.flashcards || deck.flashcards.length === 0} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 text-sm">
+                  <Play className="w-4 h-4 mr-2" /> <span className="hidden xs:inline">{t("flashcards.study")}</span><span className="xs:hidden">Study</span>
                 </Button>
-                <Button onClick={() => { setSelectedDeck(deck); setCardDialogOpen(true); }} variant="outline" className="border-border text-foreground hover:bg-muted">
+                <Button onClick={() => { setSelectedDeck(deck); setCardDialogOpen(true); }} variant="outline" className="border-border text-foreground hover:bg-muted px-3">
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>

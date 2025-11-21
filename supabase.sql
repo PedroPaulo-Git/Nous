@@ -1,4 +1,4 @@
--- Supabase schema for Notisafe MVP
+-- Supabase schema for Nous MVP
 -- Run this in the Supabase SQL editor.
 
 -- Profiles table (extension of auth.users)

@@ -1,10 +1,17 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { Languages } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function LangSwitcher() {
   const router = useRouter();
-  const pathname = usePathname();
   const [locale, setLocale] = useState('en');
 
   useEffect(() => {
@@ -22,13 +29,30 @@ export function LangSwitcher() {
   };
 
   return (
-    <select
-      value={locale}
-      onChange={(e) => handleChange(e.target.value)}
-      className="px-3 py-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-black rounded"
-    >
-      <option value="en">EN</option>
-      <option value="pt-BR">PT-BR</option>
-    </select>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all"
+        >
+          <Languages className="w-5 h-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[120px]">
+        <DropdownMenuItem
+          onClick={() => handleChange('en')}
+          className={locale === 'en' ? 'bg-accent/10 text-accent' : ''}
+        >
+          🇺🇸 English
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => handleChange('pt-BR')}
+          className={locale === 'pt-BR' ? 'bg-accent/10 text-accent' : ''}
+        >
+          🇧🇷 Português
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
