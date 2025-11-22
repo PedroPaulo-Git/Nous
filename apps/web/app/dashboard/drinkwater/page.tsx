@@ -25,12 +25,24 @@ import { useTranslations } from "next-intl";
 import ModalAddWater from "@/components/drinkwater/ModalAddWater";
 
 export default function DrinkWaterPage() {
+  
   const [quantidadeAguaBebida, setQuantidadeAguaBebida] = useState<number>(0); // ml
+  let currentQuantidadeAguaBebida = quantidadeAguaBebida;
+
+ 
   const [quantidadenecessaria, setQuantidadeNecessaria] =
     useState<number>(3000); // ml
+
+  let daily_progress_bar_percentage = (currentQuantidadeAguaBebida / quantidadenecessaria) * 100;
+
+  if(daily_progress_bar_percentage > 100){
+    daily_progress_bar_percentage = 100;
+  }
+
   const [abrirmodaldeadicionaragua, setAbrirModalDeAdicionarAgua] =
     useState(false);
   const ArrayQuantidadeDefault_de_agua = [100, 200, 500, 1000];
+  const [drinkWaterGoal, setDrinkWaterGoal] = useState(false);
 
   const t = useTranslations("dashboard");
   const handleQuantidadenecessariaChange = () => {
@@ -94,13 +106,29 @@ export default function DrinkWaterPage() {
           <CardContent>
             <div>
               <div
-                className={` bg-gray-600 w-10`}
+                className={` bg-gray-100 w-10 flex items-end `}
                 style={{ height: `${quantidadenecessaria / 10}px` }}
               >
                 <div
                   className={` bg-blue-600 w-10`}
-                  style={{ height: `${quantidadeAguaBebida / 10}px` }}
+                  style={{ height: `${daily_progress_bar_percentage}%` }}
                 ></div>
+
+                <div className="ml-14">
+                <div className="flex">
+                  <span className="text-nowrap mr-2">Quantity Needed: </span>
+                 {quantidadenecessaria}ml
+                </div>
+                 <div className="flex">
+                  <span className="text-nowrap mr-2">Current drinked water: </span>
+                 {currentQuantidadeAguaBebida}ml
+                </div>
+                <div className="flex">
+                  <span className="text-nowrap mr-2">Daily Percentage:   </span>
+                    {daily_progress_bar_percentage}%
+                </div>
+                </div>
+                 
               </div>
             </div>
           </CardContent>
@@ -109,8 +137,12 @@ export default function DrinkWaterPage() {
 
       {abrirmodaldeadicionaragua && (
         <ModalAddWater
+          setDrinkWaterGoal={setDrinkWaterGoal}
+          drinkWaterGoal={drinkWaterGoal}
+          quantidadenecessaria={quantidadenecessaria}
           setQuantidadeAguaBebida={setQuantidadeAguaBebida}
           quantidadeAguaBebida={quantidadeAguaBebida}
+          currentQuantidadeAguaBebida={currentQuantidadeAguaBebida}
           ArrayQuantidadeDefault_de_agua={ArrayQuantidadeDefault_de_agua}
         />
       )}
