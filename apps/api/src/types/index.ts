@@ -58,7 +58,36 @@ export interface UpdateVaultBody {
 export interface UpdateSubscriptionBody {
   is_subscribed: boolean;
 }
+//drink water types fastify route
+export interface DrinkWaterEntryBody {
+  quantity_ml: number;
+  // total_ml: number;
+  source?: string;
 
+  when_drink?: Date;
+}
+
+export interface UpdateDrinkWaterEntryBody {
+  quantity_ml: number;
+  total_ml: number;
+  source?: string;
+
+  when_drink?: Date;
+}
+export interface DrinkWaterGoalsBody {
+  goal_ml: number;
+  total_ml: number;
+
+  goal_quantity_ml: number;
+  completed: boolean;
+
+}
+export interface DrinkWaterSteakBody {
+  streak_current: number;
+  streak_best: number;
+  last_day_check: Date;
+
+}
 // Response Types
 export interface Note {
   id: string;

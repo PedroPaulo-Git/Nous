@@ -9,6 +9,7 @@ import { flashcardsRoutes } from './routes/flashcards.js';
 import { passwordsRoutes } from './routes/passwords.js';
 import { adminRoutes } from './routes/admin.js';
 import { workoutsRoutes } from './routes/workouts.js';
+import { drinkWaterRoutes } from './routes/drinkwater.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -29,6 +30,7 @@ async function build() {
   app.register(async (instance) => flashcardsRoutes(instance), { prefix: '/flashcards' });
   app.register(async (instance) => passwordsRoutes(instance), { prefix: '/passwords' });
   app.register(async (instance) => workoutsRoutes(instance), { prefix: '/workouts' });
+  app.register(async (instance) => drinkWaterRoutes(instance), { prefix: '/drinkwater' });
   app.register(async (instance) => adminRoutes(instance), { prefix: '/admin' });
 
   app.get('/health', async () => ({ ok: true }));

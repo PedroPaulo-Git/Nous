@@ -3,109 +3,107 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "../ui/card";
 import { CircleMinus, CirclePlus } from "lucide-react";
 
-const ModalAddWater = ({
-  quantidadeAguaBebida,
-  currentQuantidadeAguaBebida,
-  setQuantidadeAguaBebida,
-  ArrayQuantidadeDefault_de_agua,
-  quantidadenecessaria,
-  drinkWaterGoal,
-  setDrinkWaterGoal,
-}: {
-  quantidadeAguaBebida: number;
-  currentQuantidadeAguaBebida: number;
-  setQuantidadeAguaBebida: React.Dispatch<React.SetStateAction<number>>;
-  quantidadenecessaria: number;
-  ArrayQuantidadeDefault_de_agua: number[];
-  drinkWaterGoal: boolean;
-  setDrinkWaterGoal: React.Dispatch<React.SetStateAction<boolean>>;
+interface ModalAddWaterProps {
+  waterConsumedMl: number;
+  setWaterConsumedMl: React.Dispatch<React.SetStateAction<number>>;
+  dailyWaterGoalMl: number;
+  waterPresetAmounts: number[];
+  goalReached: boolean;
+  setGoalReached: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const ModalAddWater: React.FC<ModalAddWaterProps> = ({
+  waterConsumedMl,
+  setWaterConsumedMl,
+  dailyWaterGoalMl,
+  waterPresetAmounts,
+  goalReached,
+  setGoalReached,
 }) => {
-  if (!currentQuantidadeAguaBebida || currentQuantidadeAguaBebida < 0) {
-    currentQuantidadeAguaBebida = 0;
-  }
+  const currentWater = waterConsumedMl < 0 ? 0 : waterConsumedMl;
+  const [customAmountMl, setCustomAmountMl] = useState<number>(0);
+
   useEffect(() => {
-    console.log("current", currentQuantidadeAguaBebida);
-    if (currentQuantidadeAguaBebida <= 0) {
-      setQuantidadeAguaBebida(0);
-      currentQuantidadeAguaBebida = 0;
-      setDrinkWaterGoal(false);
+    if (currentWater <= 0) {
+      setGoalReached(false);
     }
-  }, [currentQuantidadeAguaBebida]);
+  }, [currentWater, setGoalReached]);
 
-  const handleSetQuantidadeAguaBebida = (quantidadeAguaBebida: number) => {
-    console.log("quantidade de agua bebida", quantidadeAguaBebida);
-    console.log("currentQuantidadeAguaBebida", currentQuantidadeAguaBebida);
-    console.log("quantidadenecessaria", quantidadenecessaria);
-
-    if (currentQuantidadeAguaBebida >= quantidadenecessaria) {
-      console.log("voce ja atingiu sua meta diaria de agua!!!!!!!!!!!!!!!!");
-      setDrinkWaterGoal(true);
-    } else {
-      console.log("voce ainda nao atingiu sua meta diaria de agua");
-      setQuantidadeAguaBebida(
-        currentQuantidadeAguaBebida + quantidadeAguaBebida
-      );
+  const addWater = (amount: number) => {
+    if (goalReached) return;
+    const newTotal = currentWater + amount;
+    setWaterConsumedMl(newTotal);
+    if (newTotal >= dailyWaterGoalMl) {
+      setGoalReached(true);
     }
   };
-  const handleRemoveQuantidadeAguaBebida = (quantidadeAguaBebida: number) => {
-    console.log("quantidade de agua removida", quantidadeAguaBebida);
-    setQuantidadeAguaBebida(currentQuantidadeAguaBebida - quantidadeAguaBebida);
-    if (currentQuantidadeAguaBebida <= 0) {
-      setQuantidadeAguaBebida(0);
-      currentQuantidadeAguaBebida = 0;
-      setDrinkWaterGoal(false);
+
+  const removeWater = (amount: number) => {
+    const newTotal = currentWater - amount;
+    const sanitized = newTotal < 0 ? 0 : newTotal;
+    setWaterConsumedMl(sanitized);
+    if (sanitized < dailyWaterGoalMl) {
+      setGoalReached(false);
     }
-    console.log("currentQuantidadeAguaBebida", currentQuantidadeAguaBebida);
+  };
+
+  const addCustomAmount = () => {
+    if (customAmountMl > 0) {
+      addWater(customAmountMl);
+      setCustomAmountMl(0);
+    }
   };
 
   return (
-    <div>
-      <div className="flex gap-4">
-
-
-      {ArrayQuantidadeDefault_de_agua.map((quantidadeAgua_lista, index) => (
-        <div key={index} className="flex justify-center gap-6 mb-2">
-          {index === 0 ?  (<span>|</span>) :  null}
-    
-            <span>
-              <CircleMinus
-                key={index}
-                onClick={() =>
-                  handleRemoveQuantidadeAguaBebida(quantidadeAgua_lista)
-                }
-                className={
-                  quantidadeAguaBebida > 0 ? "cursor-pointer text-red-400" : "opacity-50"
-                }
-              />
-            </span>
-
-            <span key={index}>{quantidadeAgua_lista}ml</span>
-
-            <span>
-              <CirclePlus
-                key={index}
-                onClick={() =>
-                  handleSetQuantidadeAguaBebida(quantidadeAgua_lista)
-                }
-                className={drinkWaterGoal ? "opacity-50 "  : "cursor-pointer text-green-400"}
-              />{" "}
-            </span>
-            |
-        </div>
-      ))}
-            </div>
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-4">
+        {waterPresetAmounts.map((preset, idx) => (
+          <div key={idx} className="flex items-center gap-4 mb-2">
+            <CircleMinus
+              onClick={() => removeWater(preset)}
+              className={
+                currentWater > 0 ? "cursor-pointer text-red-500" : "opacity-40"
+              }
+            />
+            <span>{preset}ml</span>
+            <CirclePlus
+              onClick={() => addWater(preset)}
+              className={
+                goalReached ? "opacity-40" : "cursor-pointer text-green-500"
+              }
+            />
+          </div>
+        ))}
+      </div>
 
       <Card>
-        <CardHeader></CardHeader>
-        <input
-          type="number"
-          placeholder="Quantidade em ml"
-          value={currentQuantidadeAguaBebida}
-        ></input>
-
-        <Button onClick={() => handleSetQuantidadeAguaBebida}>
-          quantidade personalizada de agua
-        </Button>
+        <CardHeader className="p-4">
+          <div className="text-sm font-medium">Custom Amount</div>
+        </CardHeader>
+        <div className="p-4 space-y-3">
+          <input
+            type="number"
+            min={0}
+            className="border rounded px-2 py-1 w-full text-sm"
+            placeholder="Amount (ml)"
+            value={customAmountMl}
+            onChange={(e) => setCustomAmountMl(Number(e.target.value))}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addCustomAmount}
+            disabled={goalReached || customAmountMl <= 0}
+          >
+            Add Custom Amount
+          </Button>
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p>Consumed Today: {currentWater}ml / Goal: {dailyWaterGoalMl}ml</p>
+            {goalReached && (
+              <p className="text-green-600 font-semibold">Daily goal reached!</p>
+            )}
+          </div>
+        </div>
       </Card>
     </div>
   );
