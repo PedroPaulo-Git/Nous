@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { getPlanLimitError } from '../lib/plan-limits.js';
 
 const PasswordSchema = z.object({
   website: z.string().min(1),
@@ -31,9 +32,11 @@ export async function passwordsRoutes(app: FastifyInstance) {
   });
 
   // Create a new password
-  app.post<{ Body: z.infer<typeof PasswordSchema> }>('/', async (req) => {
+  app.post<{ Body: z.infer<typeof PasswordSchema> }>('/', async (req, reply) => {
     const parsed = PasswordSchema.safeParse(req.body);
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
+    const limitError = await getPlanLimitError(app, req, 'passwords');
+    if (limitError) return reply.code(limitError.statusCode).send(limitError);
 
     const { data, error } = await app.supabase
       .from('passwords')

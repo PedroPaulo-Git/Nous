@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { IdParam } from '../types/index.js';
+import { getPlanLimitError } from '../lib/plan-limits.js';
 
 const TodoSchema = z.object({
   title: z.string().min(1),
@@ -34,9 +35,11 @@ export async function todosRoutes(app: FastifyInstance) {
     return data;
   });
 
-  app.post('/', async (req) => {
+  app.post('/', async (req, reply) => {
     const parsed = TodoSchema.safeParse(req.body);
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
+    const limitError = await getPlanLimitError(app, req, 'todos');
+    if (limitError) return reply.code(limitError.statusCode).send(limitError);
     
     const { data, error } = await app.supabase
       .from('todos')

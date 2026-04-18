@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { IdParam, CreateNoteBody, UpdateNoteBody } from '../types/index.js';
+import { getPlanLimitError } from '../lib/plan-limits.js';
 
 const NoteSchema = z.object({
   title: z.string().min(1).optional(),
@@ -20,9 +21,11 @@ export async function notesRoutes(app: FastifyInstance) {
     return data;
   });
 
-  app.post<{ Body: CreateNoteBody }>('/', async (req) => {
+  app.post<{ Body: CreateNoteBody }>('/', async (req, reply) => {
     const parsed = NoteSchema.safeParse(req.body);
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
+    const limitError = await getPlanLimitError(app, req, 'notes');
+    if (limitError) return reply.code(limitError.statusCode).send(limitError);
     const { data, error } = await app.supabase
       .from('notes')
       .insert({ ...parsed.data, user_id: req.user!.id })

@@ -59,6 +59,7 @@ export interface Profile {
 
 export interface AdminUser {
   id: string;
+  email?: string | null;
   is_subscribed: boolean;
   is_admin: boolean;
   created_at: string;

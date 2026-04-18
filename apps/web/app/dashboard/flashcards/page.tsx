@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, API_URL } from "@/lib/api";
+import { getToken, API_URL, getApiErrorMessage } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -135,7 +135,7 @@ export default function FlashcardsPage() {
       const response = await fetch(`${API_URL}/flashcards/decks`, {
         method: 'POST', headers, body: JSON.stringify({ name: deckName, description: deckDescription || undefined })
       });
-      if (!response.ok) throw new Error('Failed to create deck');
+      if (!response.ok) throw new Error(await getApiErrorMessage(response, 'Failed to create deck'));
       toast.success(t("common.success"));
       setDeckDialogOpen(false);
       setDeckName("");
@@ -168,7 +168,7 @@ export default function FlashcardsPage() {
       const response = await fetch(`${API_URL}/flashcards/decks/${selectedDeck.id}/cards`, {
         method: 'POST', headers, body: JSON.stringify({ front: question, back: answer, hint: hint || undefined })
       });
-      if (!response.ok) throw new Error('Failed to create card');
+      if (!response.ok) throw new Error(await getApiErrorMessage(response, 'Failed to create card'));
       toast.success(t("common.success"));
       setCardDialogOpen(false);
       setQuestion(""); setAnswer(""); setHint("");

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, API_URL } from "@/lib/api";
+import { getToken, API_URL, getApiErrorMessage } from "@/lib/api";
 import { encryptPassword, decryptPassword, deserializeEncrypted, serializeEncrypted, generateSecurePassword } from "@/lib/crypto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,7 +128,7 @@ export default function PasswordsPage() {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to save password");
+      if (!response.ok) throw new Error(await getApiErrorMessage(response, "Failed to save password"));
 
       toast.success(t("common.success"));
       setDialogOpen(false);

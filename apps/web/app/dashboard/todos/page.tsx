@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, API_URL } from "@/lib/api";
+import { getToken, API_URL, getApiErrorMessage } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -136,7 +136,7 @@ export default function TodosPage() {
         body: JSON.stringify(todoData),
       });
 
-      if (!response.ok) throw new Error("Failed to save todo");
+      if (!response.ok) throw new Error(await getApiErrorMessage(response, "Failed to save todo"));
 
       toast.success(t("common.success"));
       setDialogOpen(false);

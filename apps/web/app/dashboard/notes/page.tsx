@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, API_URL } from "@/lib/api";
+import { getToken, API_URL, getApiErrorMessage } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -87,7 +87,7 @@ export default function NotesPage() {
         body: JSON.stringify({ title, content }),
       });
 
-      if (!response.ok) throw new Error("Failed to save note");
+      if (!response.ok) throw new Error(await getApiErrorMessage(response, "Failed to save note"));
 
       toast.success(t("common.success"), {
         description: `Your note "${title}" has been saved`

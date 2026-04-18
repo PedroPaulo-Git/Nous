@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('nous_session')?.value;
 
   // Protect auth-required pages
-  const protectedPaths = ['/notes', '/todos', '/flashcards', '/passwords', '/admin'];
+  const protectedPaths = ['/dashboard', '/admin'];
   const isProtected = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
 
   if (isProtected && !token) {
@@ -35,13 +35,6 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/admin') && user) {
     if (!profile?.is_admin) {
       return NextResponse.redirect(new URL('/', request.url));
-    }
-  }
-
-  // Subscription gate: if logged in but not subscribed, block tool pages
-  if (isProtected && user && !request.nextUrl.pathname.startsWith('/admin')) {
-    if (!profile?.is_subscribed) {
-      return NextResponse.redirect(new URL('/pricing', request.url));
     }
   }
 

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { IdParam, DeckIdParam, CreateFlashcardDeckBody, CreateFlashcardBody } from '../types/index.js';
+import { getPlanLimitError } from '../lib/plan-limits.js';
 
 const DeckSchema = z.object({ name: z.string().min(1) });
 const UpdateDeckSchema = z.object({ 
@@ -55,9 +56,11 @@ export async function flashcardsRoutes(app: FastifyInstance) {
     return decksWithCounts;
   });
 
-  app.post<{ Body: CreateFlashcardDeckBody }>('/decks', async (req) => {
+  app.post<{ Body: CreateFlashcardDeckBody }>('/decks', async (req, reply) => {
     const parsed = DeckSchema.safeParse(req.body);
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
+    const limitError = await getPlanLimitError(app, req, 'flashcardDecks');
+    if (limitError) return reply.code(limitError.statusCode).send(limitError);
     const { data, error } = await app.supabase
       .from('flashcard_decks')
       .insert({ name: parsed.data.name, user_id: req.user!.id })
@@ -107,10 +110,12 @@ export async function flashcardsRoutes(app: FastifyInstance) {
     return data;
   });
 
-  app.post<{ Params: DeckIdParam; Body: CreateFlashcardBody }>('/decks/:deckId/cards', async (req) => {
+  app.post<{ Params: DeckIdParam; Body: CreateFlashcardBody }>('/decks/:deckId/cards', async (req, reply) => {
     const { deckId } = req.params;
     const parsed = CardSchema.safeParse(req.body);
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
+    const limitError = await getPlanLimitError(app, req, 'flashcards');
+    if (limitError) return reply.code(limitError.statusCode).send(limitError);
     const { data, error } = await app.supabase
       .from('flashcards')
       .insert({ 

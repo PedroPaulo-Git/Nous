@@ -34,3 +34,12 @@ export async function createJsonAuthHeaders(): Promise<HeadersInit> {
     Authorization: `Bearer ${token}`,
   };
 }
+
+type ApiErrorPayload = {
+  message?: string;
+};
+
+export async function getApiErrorMessage(response: Response, fallback: string): Promise<string> {
+  const payload = (await response.json().catch(() => null)) as ApiErrorPayload | null;
+  return payload?.message ?? fallback;
+}

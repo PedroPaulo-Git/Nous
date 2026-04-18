@@ -37,8 +37,8 @@ export default function PricingPage() {
       router.push("/login");
       return;
     }
-    toast.info("Payment processing", {
-      description: "This would redirect to a payment gateway in production"
+    toast.info("Manual premium activation", {
+      description: "Premium is activated manually for now. Use the admin account to grant access."
     });
   };
 
@@ -76,9 +76,10 @@ export default function PricingPage() {
               <CardContent>
                 <ul className="space-y-3">
                   {[
-                    "Basic notes & todos",
+                    "Up to 10 notes",
+                    "Up to 10 todos",
                     "Up to 10 flashcards",
-                    "Limited password vault",
+                    "Up to 10 passwords",
                     "Email support",
                     "7-day sync history",
                   ].map((feature) => (
@@ -150,7 +151,7 @@ export default function PricingPage() {
                   onClick={handleSubscribe}
                   disabled={isSubscribed}
                 >
-                  {isSubscribed ? "Current Plan" : "Upgrade to Pro"}
+                  {isSubscribed ? "Current Plan" : "Request Pro Access"}
                 </Button>
               </CardFooter>
             </Card>
