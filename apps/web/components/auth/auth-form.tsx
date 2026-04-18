@@ -15,12 +15,26 @@ interface AuthFormProps {
   mode: "login" | "register";
 }
 
+type AuthFormError = {
+  message?: string;
+  code?: string;
+  statusCode?: number;
+};
+
 export function AuthForm({ mode }: AuthFormProps) {
   const t = useTranslations();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const getErrorMessage = (error: AuthFormError) => {
+    if (error?.message) return error.message;
+
+    return mode === "login"
+      ? "Unable to complete login right now. Please try again later."
+      : "Unable to create account right now. Please try again later.";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,9 +72,9 @@ export function AuthForm({ mode }: AuthFormProps) {
           router.refresh();
         }, 1000);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t("common.error"), {
-        description: error.message || "Please check your credentials and try again.",
+        description: getErrorMessage(error as AuthFormError),
       });
     } finally {
       setLoading(false);

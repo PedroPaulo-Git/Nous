@@ -14,6 +14,14 @@ import { drinkWaterRoutes } from './routes/drinkwater.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
+type PgLikeError = {
+  code?: string;
+  constraint?: string;
+  message?: string;
+  statusCode?: number;
+  name?: string;
+};
+
 /**
  * Entry point for the Fastify API server.
  * Routes are mounted under logical prefixes.
@@ -36,6 +44,53 @@ async function build() {
   app.register(async (instance) => adminRoutes(instance), { prefix: '/admin' });
 
   app.get('/health', async () => ({ ok: true }));
+
+  app.setErrorHandler((error, req, reply) => {
+    const appError = error as PgLikeError;
+    const isDatabaseError =
+      typeof appError.code === 'string' && (/^\d/.test(appError.code) || /^[A-Z0-9]+$/i.test(appError.code));
+    const statusCode = appError.statusCode && appError.statusCode >= 400 ? appError.statusCode : 500;
+
+    if (isDatabaseError) {
+      req.log.error(
+        {
+          event: 'request_failed',
+          path: req.url,
+          method: req.method,
+          statusCode,
+          dbCode: appError.code,
+          dbConstraint: appError.constraint,
+          dbMessage: appError.message,
+        },
+        'Request failed due to a database error'
+      );
+    } else {
+      req.log.error(
+        {
+          event: 'request_failed',
+          path: req.url,
+          method: req.method,
+          statusCode,
+          message: appError.message,
+        },
+        'Request failed'
+      );
+    }
+
+    if (reply.sent) {
+      return;
+    }
+
+    reply.code(statusCode).send({
+      statusCode,
+      code: isDatabaseError ? 'DATABASE_ERROR' : 'INTERNAL_SERVER_ERROR',
+      error: statusCode >= 500 ? 'Internal Server Error' : appError.name || 'Error',
+      message:
+        statusCode >= 500
+          ? 'An unexpected error occurred while processing the request.'
+          : appError.message,
+    });
+  });
 
   return app;
 }

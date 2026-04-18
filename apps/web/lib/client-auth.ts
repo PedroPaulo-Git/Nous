@@ -14,6 +14,19 @@ type AuthResponse = {
   user: AuthUser;
 };
 
+type ApiErrorPayload = {
+  statusCode?: number;
+  code?: string;
+  error?: string;
+  message?: string;
+};
+
+type AuthClientError = {
+  statusCode: number;
+  code: string;
+  message: string;
+};
+
 function setSessionCookie(token: string, expiresIn: number) {
   document.cookie = `nous_session=${encodeURIComponent(token)}; Path=/; Max-Age=${expiresIn}; SameSite=Lax`;
 }
@@ -51,6 +64,19 @@ function decodeToken(token: string): AuthUser | null {
   }
 }
 
+function buildAuthClientError(path: string, status: number, payload: ApiErrorPayload | null): AuthClientError {
+  const fallbackMessage =
+    path === 'login'
+      ? 'Unable to complete login right now. Please try again later.'
+      : 'Unable to create account right now. Please try again later.';
+
+  return {
+    statusCode: payload?.statusCode ?? status,
+    code: payload?.code ?? 'AUTH_REQUEST_FAILED',
+    message: payload?.message ?? fallbackMessage,
+  };
+}
+
 async function requestAuth(path: string, body: { email: string; password: string }) {
   const response = await fetch(`${API_URL}/auth/${path}`, {
     method: 'POST',
@@ -62,7 +88,7 @@ async function requestAuth(path: string, body: { email: string; password: string
   if (!response.ok) {
     return {
       data: { user: null, session: null },
-      error: { message: payload?.message ?? 'Authentication failed' },
+      error: buildAuthClientError(path, response.status, payload),
     };
   }
 
