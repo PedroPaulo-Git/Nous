@@ -1,0 +1,55 @@
+databases:
+  - name: nous-postgres
+    plan: free
+    region: oregon
+    databaseName: nous
+
+services:
+  - type: web
+    name: nous-api
+    runtime: node
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    buildCommand: npm ci && npm --workspace apps/api run prisma:generate && npm --workspace apps/api run build
+    startCommand: npm --workspace apps/api run prisma:migrate:deploy && npm --workspace apps/api run start
+    buildFilter:
+      paths:
+        - package.json
+        - package-lock.json
+        - apps/api/**
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: DATABASE_POOL_MAX
+        value: "10"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nous-postgres
+          property: connectionString
+      - key: AUTH_JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_ORIGIN
+        sync: false
+
+  - type: web
+    name: nous-web
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci && npm --workspace apps/web run build
+    startCommand: npm --workspace apps/web run start -- --hostname 0.0.0.0 --port $PORT
+    buildFilter:
+      paths:
+        - package.json
+        - package-lock.json
+        - apps/web/**
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_NAME
+        value: Nous
+      - key: NEXT_PUBLIC_API_URL
+        sync: false

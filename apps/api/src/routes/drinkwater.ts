@@ -1,7 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
 import type { IdParam, DrinkWaterEntryBody } from "../types/index.js";
-import supabase from "../plugins/supabase.js";
 
 const DrinkWaterEntrySchema = z.object({
   quantity_ml: z.number().min(1),
@@ -88,7 +87,6 @@ export async function drinkWaterRoutes(app: FastifyInstance) {
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
     const { data, error } = await app.supabase
       .from("drinkwater_logs")
-      // @ts-expect-error - Supabase type inference limitation
       .insert({ ...parsed.data, user_id: req.user!.id })
       .select()
       .maybeSingle();
@@ -132,7 +130,6 @@ export async function drinkWaterRoutes(app: FastifyInstance) {
 
     const { data, error } = await app.supabase
       .from("drinkwater_summary")
-      // @ts-expect-error - Supabase type inference limitation
       .upsert({
         user_id: req.user!.id,       // ✅
         drinkwater_day: today,       // ✅
@@ -159,7 +156,6 @@ export async function drinkWaterRoutes(app: FastifyInstance) {
 
     const { data, error } = await app.supabase
       .from("drinkwater_summary")
-      // @ts-expect-error - Supabase type inference limitation
       .insert({ ...parsed.data, user_id: req.user!.id })
       .select()
       .maybeSingle();

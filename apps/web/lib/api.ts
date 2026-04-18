@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase-client';
+import { API_URL } from '@/lib/config';
+export { API_URL } from '@/lib/config';
 
 /**
  * Get the current user's JWT access token
@@ -11,11 +13,6 @@ export async function getToken(): Promise<string> {
   } = await supabase.auth.getSession();
   return session?.access_token || '';
 }
-
-/**
- * Base URL for API requests
- */
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 /**
  * Create authorization headers with JWT token

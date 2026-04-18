@@ -40,7 +40,6 @@ export async function todosRoutes(app: FastifyInstance) {
     
     const { data, error } = await app.supabase
       .from('todos')
-      // @ts-expect-error - Supabase type inference limitation
       .insert({ 
         ...parsed.data,
         is_done: parsed.data.is_done ?? false,
@@ -60,7 +59,6 @@ export async function todosRoutes(app: FastifyInstance) {
     
     const { data, error } = await app.supabase
       .from('todos')
-      // @ts-expect-error - Supabase type inference limitation
       .update(parsed.data)
       .eq('id', id)
       .eq('user_id', req.user!.id)

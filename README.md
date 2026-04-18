@@ -10,7 +10,7 @@ A complete SaaS productivity suite with **Notes**, **To-Dos**, **Flashcards**, a
 - **🔐 Password Vault**: Securely store passwords with client-side AES encryption (PBKDF2 + AES-256)
 - **🌙 Dark Mode**: System-aware theme toggle ("black stylish" / "white stylish")
 - **🌍 i18n**: Multi-language support (English & Portuguese)
-- **🔒 Authentication**: Supabase Auth with email/password
+- **🔒 Authentication**: Local JWT auth with email/password
 - **💳 Subscription Model**: Freemium with subscription gating
 - **👨‍💼 Admin Panel**: User management and subscription control
 
@@ -24,12 +24,12 @@ A complete SaaS productivity suite with **Notes**, **To-Dos**, **Flashcards**, a
 - **next-intl** (internationalization)
 - **next-themes** (dark mode)
 - **crypto-js** (client-side encryption)
-- **Supabase SSR**
+- **Cookie-based local session**
 
 ### Backend
 - **Fastify 5.0**
 - **TypeScript 5.6**
-- **Supabase JS 2.45** (PostgreSQL + Auth)
+- **PostgreSQL (`pg`)**
 - **Zod 3.23** (validation)
 - **dotenv** (environment variables)
 
@@ -61,7 +61,7 @@ Nous/
 ### Prerequisites
 - **Node.js 18+** (recommended: 20.x)
 - **npm** or **yarn**
-- **Supabase account** ([supabase.com](https://supabase.com))
+- **PostgreSQL 14+**
 
 ### 1. Clone the repository
 ```bash
@@ -81,11 +81,12 @@ cd apps/api && npm install
 cd ../web && npm install
 ```
 
-### 3. Set up Supabase
+### 3. Set up local PostgreSQL
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the entire `supabase.sql` file
-3. Get your API keys from **Project Settings → API**
+1. Create a local database, for example `nous`
+2. Run `postgres-local-bootstrap.sql`
+3. Run `supabase.sql`
+4. Run the SQL files in `apps/api/migrations/` that your features need
 
 ### 4. Configure environment variables
 
@@ -93,15 +94,13 @@ cd ../web && npm install
 ```env
 API_PORT=4000
 API_HOST=0.0.0.0
-SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-SUPABASE_ANON_KEY=your_anon_key
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/nous
+AUTH_JWT_SECRET=replace-with-a-long-random-secret
+DATABASE_POOL_MAX=10
 ```
 
 #### Frontend (`apps/web/.env.local`)
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 NEXT_PUBLIC_API_URL=http://localhost:4000
 NEXT_PUBLIC_APP_NAME=Nous
 ```
@@ -169,7 +168,7 @@ Open **http://localhost:3000** in your browser
 ## 🔐 Authentication & Subscription Flow
 
 ### User Registration & Login
-- Uses **Supabase Auth** with email/password
+- Uses local auth backed by PostgreSQL + JWT
 - Registration creates a profile with `is_subscribed = false` and `is_admin = false`
 - Login redirects to the dashboard (`/`)
 

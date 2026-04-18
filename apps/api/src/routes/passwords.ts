@@ -37,7 +37,6 @@ export async function passwordsRoutes(app: FastifyInstance) {
 
     const { data, error } = await app.supabase
       .from('passwords')
-      // @ts-expect-error - Supabase type inference limitation
       .insert({
         user_id: req.user!.id,
         website: parsed.data.website,
@@ -61,7 +60,6 @@ export async function passwordsRoutes(app: FastifyInstance) {
 
       const { data, error } = await app.supabase
         .from('passwords')
-        // @ts-expect-error - Supabase type inference limitation
         .update(parsed.data)
         .eq('id', req.params.id)
         .eq('user_id', req.user!.id)

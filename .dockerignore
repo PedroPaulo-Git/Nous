@@ -1,0 +1,15 @@
+node_modules
+apps/*/node_modules
+.next
+apps/*/.next
+dist
+apps/*/dist
+.git
+.claude
+.env
+.env.*
+coverage
+*.log
+npm-debug.log*
+Dockerfile*
+render.docker.yaml

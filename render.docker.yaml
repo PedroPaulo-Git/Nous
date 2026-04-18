@@ -1,0 +1,57 @@
+databases:
+  - name: nous-postgres
+    plan: free
+    region: oregon
+    databaseName: nous
+
+services:
+  - type: web
+    name: nous-api
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    dockerContext: .
+    dockerfilePath: apps/api/Dockerfile
+    buildFilter:
+      paths:
+        - package.json
+        - package-lock.json
+        - apps/api/**
+        - .dockerignore
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: DATABASE_POOL_MAX
+        value: "10"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nous-postgres
+          property: connectionString
+      - key: AUTH_JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_ORIGIN
+        sync: false
+
+  - type: web
+    name: nous-web
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerContext: .
+    dockerfilePath: apps/web/Dockerfile
+    buildFilter:
+      paths:
+        - package.json
+        - package-lock.json
+        - apps/web/**
+        - .dockerignore
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_NAME
+        value: Nous
+      - key: NEXT_PUBLIC_API_URL
+        sync: false

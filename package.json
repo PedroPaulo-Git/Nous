@@ -16,6 +16,10 @@
     "dev": "powershell -NoProfile -Command \"Start-Process powershell -ArgumentList '-NoProfile','-Command','npm run dev:api' ; npm run dev:web\"",
     "build": "npm --workspace apps/api run build && npm --workspace apps/web run build",
     "typecheck": "npm --workspace apps/api run typecheck && npm --workspace apps/web run typecheck",
-    "lint": "npm --workspace apps/web run lint"
+    "lint": "npm --workspace apps/web run lint",
+    "db:generate": "npm --workspace apps/api run prisma:generate",
+    "db:migrate": "npm --workspace apps/api run prisma:migrate:dev",
+    "db:deploy": "npm --workspace apps/api run prisma:migrate:deploy",
+    "db:status": "npm --workspace apps/api run prisma:migrate:status"
   }
 }

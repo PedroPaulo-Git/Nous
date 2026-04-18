@@ -25,7 +25,6 @@ export async function notesRoutes(app: FastifyInstance) {
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
     const { data, error } = await app.supabase
       .from('notes')
-      // @ts-expect-error - Supabase type inference limitation
       .insert({ ...parsed.data, user_id: req.user!.id })
       .select()
       .maybeSingle();
@@ -40,7 +39,6 @@ export async function notesRoutes(app: FastifyInstance) {
     const updateData = { ...parsed.data, updated_at: new Date().toISOString() };
     const { data, error } = await app.supabase
       .from('notes')
-      // @ts-expect-error - Supabase type inference limitation
       .update(updateData)
       .eq('id', id)
       .eq('user_id', req.user!.id)

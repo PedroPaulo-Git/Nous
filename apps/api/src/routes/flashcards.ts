@@ -60,7 +60,6 @@ export async function flashcardsRoutes(app: FastifyInstance) {
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
     const { data, error } = await app.supabase
       .from('flashcard_decks')
-      // @ts-expect-error - Supabase type inference limitation
       .insert({ name: parsed.data.name, user_id: req.user!.id })
       .select()
       .maybeSingle();
@@ -114,7 +113,6 @@ export async function flashcardsRoutes(app: FastifyInstance) {
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
     const { data, error } = await app.supabase
       .from('flashcards')
-      // @ts-expect-error - Supabase type inference limitation
       .insert({ 
         ...parsed.data, 
         deck_id: deckId, 

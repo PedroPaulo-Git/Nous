@@ -22,7 +22,6 @@ export async function vaultRoutes(app: FastifyInstance) {
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
     const { data, error } = await app.supabase
       .from('password_vault')
-      // @ts-expect-error - Supabase type inference limitation
       .upsert({ user_id: req.user!.id, encrypted_blob: parsed.data.encrypted_blob, updated_at: new Date().toISOString() })
       .select('encrypted_blob, updated_at')
       .maybeSingle();

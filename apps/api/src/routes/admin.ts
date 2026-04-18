@@ -20,7 +20,6 @@ export async function adminRoutes(app: FastifyInstance) {
     if (!parsed.success) throw app.httpErrors.badRequest(parsed.error.message);
     const { data, error } = await app.supabase
       .from('profiles')
-      // @ts-expect-error - Supabase type inference limitation
       .update({ is_subscribed: parsed.data.is_subscribed })
       .eq('id', id)
       .select('id,is_subscribed,is_admin,created_at')

@@ -1,0 +1,466 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["public", "auth"]
+}
+
+enum TodoPriority {
+  low
+  medium
+  high
+  urgent
+
+  @@schema("public")
+}
+
+enum TodoRecurrenceType {
+  daily
+  weekly
+  monthly
+  yearly
+  custom
+
+  @@schema("public")
+}
+
+enum FlashcardStatus {
+  new
+  learning
+  review
+  mastered
+
+  @@schema("public")
+}
+
+enum FlashcardDifficulty {
+  easy
+  normal
+  hard
+
+  @@schema("public")
+}
+
+enum SessionType {
+  new
+  review
+  cram
+  mixed
+
+  @@schema("public")
+}
+
+enum ReviewRating {
+  again
+  hard
+  good
+  easy
+
+  @@schema("public")
+}
+
+enum MuscleGroup {
+  chest
+  back
+  legs
+  arms
+  shoulders
+  core
+  cardio
+  rest
+
+  @@schema("public")
+}
+
+enum DrinkWaterSource {
+  preset
+  custom
+
+  @@schema("public")
+}
+
+model AuthUser {
+  id                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email               String                @unique
+  passwordHash        String                @map("password_hash")
+  createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  profile             Profile?
+  notes               Note[]
+  todos               Todo[]
+  flashcardDecks      FlashcardDeck[]
+  flashcards          Flashcard[]
+  passwordVault       PasswordVault?
+  passwords           Password[]
+  flashcardReviews    FlashcardReview[]
+  studySessions       StudySession[]
+  userStudyStats      UserStudyStats?
+  workoutDays         UserWorkoutDay[]
+  workoutExercises    UserWorkoutExercise[]
+  workoutLogs         WorkoutLog[]
+  drinkWaterGoals     DrinkWaterGoal[]
+  drinkWaterLogs      DrinkWaterLog[]
+  drinkWaterSummaries DrinkWaterSummary[]
+  drinkWaterStreak    DrinkWaterStreak?
+
+  @@map("users")
+  @@schema("auth")
+}
+
+model Profile {
+  id           String   @id @db.Uuid
+  isSubscribed Boolean  @default(false) @map("is_subscribed")
+  isAdmin      Boolean  @default(false) @map("is_admin")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user         AuthUser @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+  @@schema("public")
+}
+
+model Note {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  title     String?
+  content   String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user      AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notes")
+  @@schema("public")
+}
+
+model Todo {
+  id                   String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String              @map("user_id") @db.Uuid
+  title                String
+  description          String?
+  isDone               Boolean             @default(false) @map("is_done")
+  dueDate              DateTime?           @map("due_date") @db.Date
+  dueTime              DateTime?           @map("due_time") @db.Time(6)
+  startDate            DateTime?           @map("start_date") @db.Date
+  startTime            DateTime?           @map("start_time") @db.Time(6)
+  priority             TodoPriority        @default(medium)
+  isRecurring          Boolean             @default(false) @map("is_recurring")
+  recurrenceType       TodoRecurrenceType? @map("recurrence_type")
+  recurrenceInterval   Int?                @default(1) @map("recurrence_interval")
+  recurrenceDaysOfWeek Int[]               @default([]) @map("recurrence_days_of_week")
+  recurrenceDayOfMonth Int?                @map("recurrence_day_of_month")
+  recurrenceEndDate    DateTime?           @map("recurrence_end_date") @db.Date
+  category             String?
+  tags                 String[]            @default([])
+  createdAt            DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime            @default(now()) @map("updated_at") @db.Timestamptz(6)
+  completedAt          DateTime?           @map("completed_at") @db.Timestamptz(6)
+  user                 AuthUser            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("todos")
+  @@schema("public")
+}
+
+model FlashcardDeck {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String         @map("user_id") @db.Uuid
+  name          String
+  description   String?
+  color         String?        @default("#6366f1")
+  isArchived    Boolean        @default(false) @map("is_archived")
+  cardsCount    Int            @default(0) @map("cards_count")
+  masteredCount Int            @default(0) @map("mastered_count")
+  learningCount Int            @default(0) @map("learning_count")
+  newCount      Int            @default(0) @map("new_count")
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime       @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user          AuthUser       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcards    Flashcard[]
+  studySessions StudySession[]
+
+  @@index([userId])
+  @@map("flashcard_decks")
+  @@schema("public")
+}
+
+model Flashcard {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String              @map("user_id") @db.Uuid
+  deckId             String              @map("deck_id") @db.Uuid
+  front              String
+  back               String
+  hint               String?
+  easeFactor         Decimal             @default(2.5) @map("ease_factor") @db.Decimal(4, 2)
+  reviewInterval     Int                 @default(0) @map("review_interval")
+  repetitions        Int                 @default(0)
+  nextReviewDate     DateTime            @default(now()) @map("next_review_date") @db.Timestamptz(6)
+  status             FlashcardStatus     @default(new)
+  difficulty         FlashcardDifficulty @default(normal)
+  timesReviewed      Int                 @default(0) @map("times_reviewed")
+  timesCorrect       Int                 @default(0) @map("times_correct")
+  timesWrong         Int                 @default(0) @map("times_wrong")
+  averageTimeSeconds Int                 @default(0) @map("average_time_seconds")
+  lastReviewedAt     DateTime?           @map("last_reviewed_at") @db.Timestamptz(6)
+  tags               String[]            @default([])
+  isStarred          Boolean             @default(false) @map("is_starred")
+  isSuspended        Boolean             @default(false) @map("is_suspended")
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime            @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user               AuthUser            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deck               FlashcardDeck       @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  reviews            FlashcardReview[]
+
+  @@index([userId])
+  @@index([deckId])
+  @@map("flashcards")
+  @@schema("public")
+}
+
+model StudySession {
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String            @map("user_id") @db.Uuid
+  deckId               String?           @map("deck_id") @db.Uuid
+  sessionType          SessionType       @default(review) @map("session_type")
+  startedAt            DateTime          @default(now()) @map("started_at") @db.Timestamptz(6)
+  endedAt              DateTime?         @map("ended_at") @db.Timestamptz(6)
+  durationSeconds      Int?              @map("duration_seconds")
+  cardsStudied         Int               @default(0) @map("cards_studied")
+  cardsCorrect         Int               @default(0) @map("cards_correct")
+  cardsWrong           Int               @default(0) @map("cards_wrong")
+  cardsSkipped         Int               @default(0) @map("cards_skipped")
+  accuracyPercentage   Decimal?          @map("accuracy_percentage") @db.Decimal(5, 2)
+  averageResponseTime  Int?              @map("average_response_time")
+  isDailyGoalCompleted Boolean           @default(false) @map("is_daily_goal_completed")
+  streakDay            Int               @default(0) @map("streak_day")
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  user                 AuthUser          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deck                 FlashcardDeck?    @relation(fields: [deckId], references: [id], onDelete: SetNull)
+  reviews              FlashcardReview[]
+
+  @@index([userId])
+  @@map("study_sessions")
+  @@schema("public")
+}
+
+model FlashcardReview {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String        @map("user_id") @db.Uuid
+  flashcardId         String        @map("flashcard_id") @db.Uuid
+  sessionId           String?       @map("session_id") @db.Uuid
+  rating              ReviewRating
+  wasCorrect          Boolean       @map("was_correct")
+  responseTimeSeconds Int?          @map("response_time_seconds")
+  easeFactorBefore    Decimal?      @map("ease_factor_before") @db.Decimal(4, 2)
+  easeFactorAfter     Decimal?      @map("ease_factor_after") @db.Decimal(4, 2)
+  intervalBefore      Int?          @map("interval_before")
+  intervalAfter       Int?          @map("interval_after")
+  reviewedAt          DateTime      @default(now()) @map("reviewed_at") @db.Timestamptz(6)
+  user                AuthUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcard           Flashcard     @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  session             StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([flashcardId])
+  @@map("flashcard_reviews")
+  @@schema("public")
+}
+
+model UserStudyStats {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String    @unique @map("user_id") @db.Uuid
+  dailyCardsGoal        Int       @default(20) @map("daily_cards_goal")
+  dailyMinutesGoal      Int       @default(15) @map("daily_minutes_goal")
+  currentStreak         Int       @default(0) @map("current_streak")
+  longestStreak         Int       @default(0) @map("longest_streak")
+  lastStudyDate         DateTime? @map("last_study_date") @db.Date
+  totalCardsStudied     Int       @default(0) @map("total_cards_studied")
+  totalStudyTimeSeconds Int       @default(0) @map("total_study_time_seconds")
+  totalSessions         Int       @default(0) @map("total_sessions")
+  overallAccuracy       Decimal   @default(0) @map("overall_accuracy") @db.Decimal(5, 2)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user                  AuthUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_study_stats")
+  @@schema("public")
+}
+
+model PasswordVault {
+  userId        String   @id @map("user_id") @db.Uuid
+  encryptedBlob String   @map("encrypted_blob")
+  updatedAt     DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user          AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_vault")
+  @@schema("public")
+}
+
+model Password {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  website   String
+  username  String
+  password  String
+  category  String   @default("Other")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user      AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("passwords")
+  @@schema("public")
+}
+
+model WorkoutExercise {
+  id            String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  namePt        String                @map("name_pt")
+  category      String
+  description   String?
+  isActive      Boolean               @default(true) @map("is_active")
+  createdAt     DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  userExercises UserWorkoutExercise[]
+
+  @@map("workout_exercises")
+  @@schema("public")
+}
+
+model UserWorkoutDay {
+  id          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String                @map("user_id") @db.Uuid
+  dayOfWeek   Int                   @map("day_of_week")
+  muscleGroup MuscleGroup?          @map("muscle_group")
+  isRestDay   Boolean               @default(false) @map("is_rest_day")
+  notes       String?
+  createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime              @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user        AuthUser              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises   UserWorkoutExercise[]
+  logs        WorkoutLog[]
+
+  @@unique([userId, dayOfWeek])
+  @@index([userId])
+  @@map("user_workout_days")
+  @@schema("public")
+}
+
+model UserWorkoutExercise {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String               @map("user_id") @db.Uuid
+  workoutDayId    String?              @map("workout_day_id") @db.Uuid
+  exerciseId      String?              @map("exercise_id") @db.Uuid
+  customName      String?              @map("custom_name")
+  sets            Int                  @default(3)
+  reps            Int                  @default(10)
+  restSeconds     Int                  @default(60) @map("rest_seconds")
+  weightKg        Decimal?             @map("weight_kg") @db.Decimal(5, 2)
+  durationMinutes Int?                 @map("duration_minutes")
+  notes           String?
+  orderIndex      Int                  @default(0) @map("order_index")
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime             @default(now()) @map("updated_at") @db.Timestamptz(6)
+  lastCompletedAt DateTime?            @map("last_completed_at") @db.Timestamptz(6)
+  user            AuthUser             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutDay      UserWorkoutDay?      @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+  exercise        WorkoutExercise?     @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  logExercises    WorkoutLogExercise[]
+
+  @@index([userId])
+  @@index([workoutDayId])
+  @@map("user_workout_exercises")
+  @@schema("public")
+}
+
+model WorkoutLog {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String               @map("user_id") @db.Uuid
+  workoutDayId         String?              @map("workout_day_id") @db.Uuid
+  workoutDate          DateTime             @map("workout_date") @db.Date
+  totalDurationMinutes Int?                 @map("total_duration_minutes")
+  exercisesCompleted   Int                  @default(0) @map("exercises_completed")
+  exercisesTotal       Int                  @default(0) @map("exercises_total")
+  notes                String?
+  createdAt            DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  user                 AuthUser             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutDay           UserWorkoutDay?      @relation(fields: [workoutDayId], references: [id], onDelete: SetNull)
+  exercises            WorkoutLogExercise[]
+
+  @@index([userId, workoutDate])
+  @@map("workout_logs")
+  @@schema("public")
+}
+
+model WorkoutLogExercise {
+  id                    String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workoutLogId          String               @map("workout_log_id") @db.Uuid
+  userWorkoutExerciseId String?              @map("user_workout_exercise_id") @db.Uuid
+  exerciseName          String               @map("exercise_name")
+  setsCompleted         Int                  @default(0) @map("sets_completed")
+  setsPlanned           Int                  @default(0) @map("sets_planned")
+  weightUsedKg          Decimal?             @map("weight_used_kg") @db.Decimal(5, 2)
+  notes                 String?
+  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  workoutLog            WorkoutLog           @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  userWorkoutExercise   UserWorkoutExercise? @relation(fields: [userWorkoutExerciseId], references: [id], onDelete: SetNull)
+
+  @@index([workoutLogId])
+  @@map("workout_log_exercises")
+  @@schema("public")
+}
+
+model DrinkWaterGoal {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  goalQuantityMl Int      @map("goal_quantity_ml")
+  effectiveFrom  DateTime @default(now()) @map("effective_from") @db.Date
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user           AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, effectiveFrom])
+  @@index([userId, effectiveFrom])
+  @@map("drinkwater_goals")
+  @@schema("public")
+}
+
+model DrinkWaterLog {
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String           @map("user_id") @db.Uuid
+  quantityMl Int              @map("quantity_ml")
+  whenDrink  DateTime         @default(now()) @map("when_drink") @db.Timestamptz(6)
+  source     DrinkWaterSource
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  user       AuthUser         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, whenDrink(sort: Desc)])
+  @@map("drinkwater_logs")
+  @@schema("public")
+}
+
+model DrinkWaterSummary {
+  userId        String   @map("user_id") @db.Uuid
+  drinkwaterDay DateTime @map("drinkwater_day") @db.Date
+  totalMl       Int      @default(0) @map("total_ml")
+  goalMl        Int      @map("goal_ml")
+  completed     Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user          AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, drinkwaterDay])
+  @@map("drinkwater_summary")
+  @@schema("public")
+}
+
+model DrinkWaterStreak {
+  userId        String   @id @map("user_id") @db.Uuid
+  streakCurrent Int      @default(0) @map("streak_current")
+  streakBest    Int      @default(0) @map("streak_best")
+  lastDayCheck  DateTime @default(now()) @map("last_day_check") @db.Date
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user          AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("drinkwater_streak")
+  @@schema("public")
+}

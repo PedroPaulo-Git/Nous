@@ -1,6 +1,7 @@
 import fp from 'fastify-plugin';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { JwtUser, Profile } from '../types';
+import { verifyJwt } from '../lib/jwt.js';
 
 /**
  * Auth plugin: Extracts the Supabase JWT from Authorization header and resolves
@@ -9,17 +10,21 @@ import type { JwtUser, Profile } from '../types';
  * - app.addHook('preHandler', app.authRequired) for endpoints that require auth
  */
 export default fp(async function auth(app: FastifyInstance) {
+  const jwtSecret = process.env.AUTH_JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('AUTH_JWT_SECRET not set');
+  }
+
   app.decorate(
     'authOptional',
     async (request: FastifyRequest) => {
       const token = extractBearer(request);
       if (!token) return;
       try {
-        const { data: userData, error } = await app.supabase.auth.getUser(token);
-        if (error || !userData?.user) return;
-        const user: JwtUser = { id: userData.user.id, email: userData.user.email ?? undefined };
+        const payload = verifyJwt(token, jwtSecret);
+        if (!payload) return;
+        const user: JwtUser = { id: payload.sub, email: payload.email };
         request.user = user;
-        // Load profile
         const { data: profile, error: pErr } = await app.supabase
           .from('profiles')
           .select('id,is_subscribed,is_admin,created_at')
@@ -37,9 +42,9 @@ export default fp(async function auth(app: FastifyInstance) {
     async (request: FastifyRequest, reply: FastifyReply) => {
       const token = extractBearer(request);
       if (!token) return reply.unauthorized('Missing Authorization');
-      const { data: userData, error } = await app.supabase.auth.getUser(token);
-      if (error || !userData?.user) return reply.unauthorized('Invalid token');
-      const user: JwtUser = { id: userData.user.id, email: userData.user.email ?? undefined };
+      const payload = verifyJwt(token, jwtSecret);
+      if (!payload) return reply.unauthorized('Invalid token');
+      const user: JwtUser = { id: payload.sub, email: payload.email };
       request.user = user;
       const { data: profile, error: pErr } = await app.supabase
         .from('profiles')

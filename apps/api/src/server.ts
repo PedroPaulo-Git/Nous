@@ -1,7 +1,8 @@
 import Fastify from 'fastify';
 import core from './plugins/core.js';
-import supabasePlugin from './plugins/supabase.js';
+import postgresPlugin from './plugins/postgres.js';
 import auth from './plugins/auth.js';
+import { authRoutes } from './routes/auth.js';
 import { profilesRoutes } from './routes/profiles.js';
 import { notesRoutes } from './routes/notes.js';
 import { todosRoutes } from './routes/todos.js';
@@ -21,9 +22,10 @@ async function build() {
   const app = Fastify({ logger: true });
 
   await app.register(core);
-  await app.register(supabasePlugin);
+  await app.register(postgresPlugin);
   await app.register(auth);
 
+  app.register(async (instance) => authRoutes(instance), { prefix: '/auth' });
   app.register(async (instance) => profilesRoutes(instance), { prefix: '/profiles' });
   app.register(async (instance) => notesRoutes(instance), { prefix: '/notes' });
   app.register(async (instance) => todosRoutes(instance), { prefix: '/todos' });
@@ -40,7 +42,7 @@ async function build() {
 
 build()
   .then((app) => {
-    const port = Number(process.env.API_PORT || 4000);
+    const port = Number(process.env.PORT || process.env.API_PORT || 4000);
     const host = process.env.API_HOST || '0.0.0.0';
     app.listen({ port, host }).catch((err) => {
       app.log.error(err);

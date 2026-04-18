@@ -340,8 +340,8 @@ export async function workoutsRoutes(app: FastifyInstance) {
     if (sortedDates.length > 0 && sortedDates[0] === today) {
       currentStreak = 1;
       for (let i = 1; i < sortedDates.length; i++) {
-        const prevDate = new Date(sortedDates[i - 1]);
-        const currDate = new Date(sortedDates[i]);
+        const prevDate = new Date(String(sortedDates[i - 1]));
+        const currDate = new Date(String(sortedDates[i]));
         const diffDays = Math.floor((prevDate.getTime() - currDate.getTime()) / (24 * 60 * 60 * 1000));
         if (diffDays === 1) currentStreak++;
         else break;

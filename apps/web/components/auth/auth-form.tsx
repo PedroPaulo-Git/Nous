@@ -35,13 +35,6 @@ export function AuthForm({ mode }: AuthFormProps) {
         if (error) throw error;
         
         if (data.user) {
-          // Create profile
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .insert({ id: data.user.id, is_subscribed: false, is_admin: false });
-          
-          if (profileError) throw profileError;
-          
           toast.success(t("common.success"), {
             description: "Welcome to Nous. Redirecting...",
           });
