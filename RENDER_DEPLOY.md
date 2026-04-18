@@ -47,8 +47,29 @@ Depois, configure as mesmas variáveis:
 - O backend agora respeita `PORT`, que é a variável padrão do Render.
 - O comando de inicialização da API roda `prisma migrate deploy` antes de subir o servidor.
 - O `preDeployCommand` não foi usado para manter compatibilidade com plano free.
+- O script raiz `npm run start` foi trocado para uma versão cross-platform. Mesmo assim, no Render o recomendado é não publicar o monorepo inteiro como um único Web Service.
+- O deploy correto no Render é com dois serviços separados:
+  - `nous-api` usando o comando do backend
+  - `nous-web` usando o comando do frontend
 - Como o frontend usa `NEXT_PUBLIC_API_URL` no browser, a URL pública da API precisa ser definida explicitamente.
 - O CORS da API depende de `FRONTEND_ORIGIN`, então essa variável também precisa apontar para a URL pública do frontend.
+
+## Se você criou um único serviço manualmente
+
+Se o log mostra `Running 'npm run start'`, o Render está usando o script raiz do monorepo.
+
+Isso não é o setup ideal para este projeto. Corrija de uma destas formas:
+
+1. Preferido: recrie usando Blueprint e deixe o Render criar `nous-api` e `nous-web` separadamente.
+2. Manual:
+   - serviço da API:
+     - Root Directory: vazio ou raiz do repositório
+     - Build Command: `npm ci && npm --workspace apps/api run prisma:generate && npm --workspace apps/api run build`
+     - Start Command: `npm --workspace apps/api run prisma:migrate:deploy && npm --workspace apps/api run start`
+   - serviço do Web:
+     - Root Directory: vazio ou raiz do repositório
+     - Build Command: `npm ci && npm --workspace apps/web run build`
+     - Start Command: `npm --workspace apps/web run start -- --hostname 0.0.0.0 --port $PORT`
 
 ## URLs esperadas
 
